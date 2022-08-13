@@ -2,83 +2,28 @@ import { ActionTypes } from "../constants/action-types";
 
 const intialState = {
   products: [],
+  cash: []
 };
 
-const SortState = {
-  products: [],
-};
-
-const categoryState = {
-  category: [],
-};
-
-const card = localStorage.getItem("cards") ? JSON.parse(localStorage.getItem("cards")) : [];
 
 export const cardsReducer = (state = intialState, { type, payload }) => {
   switch (type) {
     case ActionTypes.SET_CARDS:
-      return { ...state, products:[...state.products , payload]  };
+      return { ...state, products: [...state.products, payload] };
+    case ActionTypes.CARD_DELETE:
+      return { ...state, products: state.products.filter((x) => x.number != payload.number) };
+    case ActionTypes.ADD_CASH:
+      const cashArray = [...state.cash, payload] ;
+      const filteredByUAH = cashArray.filter((el) => el.currency.value === "UAH").reduce((total,acc) => total + Number(acc.amount), 0);
+      const filteredByEUR = cashArray.filter((el) => el.currency.value === "EUR").reduce((total,acc) => total + Number(acc.amount), 0);
+      const filteredByUSD = cashArray.filter((el) => el.currency.value === "USD").reduce((total,acc) => total + Number(acc.amount), 0);
+      console.log({filteredByUAH,filteredByEUR, filteredByUSD });
+      const cashObj = { ...state, cash: [
+                      {amount:filteredByUAH , currency: {value:'UAH'}},
+                      {amount:filteredByEUR , currency: {value:'EUR'}},
+                      {amount:filteredByUSD , currency: {value:'USD'}} ] };
+      return cashObj;
     default:
       return state;
   }
-};
-
-export const sortReducer = (state = SortState, { type, payload }) => {
-  switch (type) {
-    case ActionTypes.SORT_PRODUCTS:
-      return { ...state, products: payload };
-    default:
-      return state;
-  }
-};
-
-export const selectedProductsReducer = (state = {}, { type, payload }) => {
-  switch (type) {
-    case ActionTypes.SELECTED_PRODUCT:
-      const sort = payload.sort;
-      if (sort === 'all'){ 
-        return {}
-      }
-      return { ...state, category: payload.products.filter((item) => item.shop === sort ) };
-    case ActionTypes.REMOVE_SELECTED_PRODUCT:
-      return {};
-    default:
-      return state;
-  }
-};
-
-export const categoryReducer = (state = categoryState, { type, payload }) => {
-  switch (type) {
-    case ActionTypes.SET_CATEGORY_PRODUCTS:
-      return { ...state, category: payload };
-    default:
-      return state;
-  }
-};
-
-
-export const handleCard = (state = card, action) => {
-  const product = action.payload;
-  localStorage.setItem("cards", JSON.stringify(state));
-  switch (action.type) {
-    case ActionTypes.ADD_ITEM:
-      const exist = state.find((x) => x.id === product.id);
-      if (exist) {
-        return state.map((x) => x.id === product.id ? { ...x, qty: x.qty + 1 } : x);
-      } else {
-        const product = action.payload;
-        return [...state, { ...product, qty: 1 }]
-      }
-
-    case ActionTypes.DELETE_ITEM:
-      const exist1 = state.find((x) => x.id === product.id);
-      if(exist1.qty === 1) {
-        return state.filter((x) => x.id !== product.id);
-      } else {
-        return state.map((x) => x.id === product.id ? { ...x , qty: x.qty - 1} : x)
-      }
-    default:
-      return state;
-  }
-
 };

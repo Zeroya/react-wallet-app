@@ -7,43 +7,20 @@ export const setCards = (card) => {
   };
 };
 
-export const selectedProduct = (product) => {
+export const cardDelete = (product) => {
   return {
-    type: ActionTypes.SELECTED_PRODUCT,
-    payload: product,
-  };
-};
-export const removeSelectedProduct = () => {
-  return {
-    type: ActionTypes.REMOVE_SELECTED_PRODUCT,
-  };
-};
-
-export const setCategoryProducts = (product) => {
-  return {
-    type: ActionTypes.SET_CATEGORY_PRODUCTS,
+    type: ActionTypes.CARD_DELETE,
     payload: product,
   };
 };
 
-export const addToCard = (product) => {
+export const addCash = (product) => {
   return {
-    type: ActionTypes.ADD_ITEM,
+    type: ActionTypes.ADD_CASH,
     payload: product,
   };
 };
 
-export const deleteFromCard = (product) => {
-  return {
-    type: ActionTypes.DELETE_ITEM,
-    payload: product,
-  };
-};
 
-export const sortProducts = (product) => {
-  return {
-    type: ActionTypes.SORT_PRODUCTS,
-    payload: product,
-  };
-};
+
 

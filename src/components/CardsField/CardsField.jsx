@@ -1,11 +1,12 @@
 import React, { useState, useEffect } from 'react';
 import s from './CardsField.module.scss';
+import ModalWindow from '../ModalWindow';
 import { Button } from 'react-bootstrap';
 import Cards from "react-credit-cards";
 import "react-credit-cards/es/styles-compiled.css";
 import Select from 'react-select';
 import { useDispatch, useSelector } from 'react-redux';
-import { setCards } from '../../redux/actions/productsActions';
+import { setCards, cardDelete } from '../../redux/actions/productsActions';
 
 const CardsField = () => {
   const [buttonTrecker, setButtonTrecker] = useState(true);
@@ -17,8 +18,11 @@ const CardsField = () => {
   const [focus, setFocus] = useState("");
   const [amount, setAmount] = useState("");
   const [currency, setCurrency] = useState("");
+  const [issuer, setIssuer] = useState("visa");
 
   const [form, setForm] = useState({});
+
+
 
   useEffect(() => {
     setForm({
@@ -27,9 +31,11 @@ const CardsField = () => {
       "expiry": expiry,
       "cvc": cvc,
       "amount": amount,
-      "currency": currency
+      "currency": currency,
+      "issuer": issuer
     });
-  }, [number, name, expiry, cvc, amount, currency])
+    console.log(issuer)
+  }, [number, name, expiry, cvc, amount, currency, issuer])
 
 
   const dispatch = useDispatch();
@@ -50,15 +56,15 @@ const CardsField = () => {
     }
   ];
 
-  const tryAll = () => {
 
+  const handleCallback = ({ issuer }) => {
 
-    console.log(restaurantSort);
-  }
+    setIssuer(issuer);
+
+  };
 
   const handleSubmit = (event) => {
     event.preventDefault();
-
     dispatch(setCards(form));
     setNumber("");
     setName("");
@@ -66,7 +72,12 @@ const CardsField = () => {
     setCvc("");
     setAmount("");
     setCurrency("");
+    setIssuer("");
     setButtonTrecker(!buttonTrecker);
+  }
+
+  const deleteCard = (el) => {
+    dispatch(cardDelete(el));
   }
 
   return (
@@ -75,21 +86,32 @@ const CardsField = () => {
         <div>
           <div className={s.cardButtonPosition}>
             <Button onClick={() => setButtonTrecker(!buttonTrecker)} className="mx-3" size="lg" variant="warning">Додати картку</Button>
-            <Button size="lg" variant="warning">Додати Готівку</Button>
+            <ModalWindow name="Додати готівку" size={"lg"}/>
 
           </div>
-          <div style={{display:'flex', flexDirection:'column', marginBottom:'1em'}} className={s.cardButtonPosition}>
+          <div style={{ display: 'flex', flexDirection: 'column', marginBottom: '1em' }} className={s.cardButtonPosition}>
             {restaurantSort.map(el => {
 
               return (
-                <div  style={{ marginBottom:'1em'}}>
-                  <Cards
-                    number={el.number}
-                    name={el.name}
-                    expiry={el.expiry}
-                    cvc={el.cvc}
-                    focused={el.focus}
-                  />
+                <div key={el.number} style={{ marginBottom: '1em', display: 'flex', alignItems: 'center' }}>
+                  <div className={s.card}>
+                    <Cards
+                      number={el.number}
+                      name={el.name}
+                      expiry={el.expiry}
+                      cvc={el.cvc}
+                      focused={el.focus}
+                    />
+                  </div>
+                  <div>
+                    <Button className={s.cardButton} onClick={() => deleteCard(el)} variant="danger">Видалити</Button>
+                    <div>
+                      <h5 style={{marginLeft:'2.3em', marginTop:'0.5em'}} className={s.cardButton}>На рахунку :
+                        <br />
+                        {el.amount} {el.currency.value}
+                      </h5>
+                    </div>
+                  </div>
                 </div>
               )
             })}
@@ -106,6 +128,7 @@ const CardsField = () => {
               expiry={expiry}
               cvc={cvc}
               focused={focus}
+              callback={handleCallback}
             />
           </div>
 
@@ -166,7 +189,7 @@ const CardsField = () => {
             </div>
 
             <div className={s.formCenterProvider}>
-              <input type="tel" placeholder="amount" maxlength="5" value={amount} onChange={(e) => setAmount(e.target.value)} />
+              <input type="tel" placeholder="amount" required maxlength="5" value={amount} onChange={(e) => setAmount(e.target.value)} />
               <div className={s.formCenterProvider} style={{ width: '7em', marginLeft: '58vh', marginTop: "0.7em" }} >
                 <Select
                   defaultValue={currency}
@@ -176,11 +199,10 @@ const CardsField = () => {
               </div>
             </div>
 
-
+            <input type="hidden" name="issuer" value={issuer} />
             <div className={s.formCenterProvider}>
               <Button type="submit" variant="warning">Додати картку</Button>
               <Button onClick={() => setButtonTrecker(!buttonTrecker)} className='mx-3 my-1' variant="danger">Скасувати</Button>
-              <Button onClick={() => tryAll()} className='mx-3 my-1' variant="danger">Скe22e2e2eсувати</Button>
             </div>
 
           </form>
